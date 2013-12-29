@@ -28,7 +28,7 @@ USAGE: python reimburse.py
 CAUTION: this script must be used on a computer with dogecoind running.
 amounts sent will be deducted from the wallet associated with dogecoind
 
-MYSQL NOTE: rows should be row_id, toAddress(string), amount_reimbursed(decimal), amount_claimed(decimal).
+MYSQL NOTE: rows should be id, toAddress(string), amount_reimbursed(decimal), amount_claimed(decimal), flag(tinyint or bool).
 make sure that your table and this code matches. edit if necessary.
 
 TODO: get dogecoind running on same server as MySQL database
@@ -40,7 +40,7 @@ import sys, os, re, requests, jsonrpclib, MySQLdb
 from decimal import *
 
 TRANSACTION_TAX = Decimal('1.0') # is this right?
-REIMBURSEMENT_RATIO = Decimal('0.1') # change depending on amount raised
+REIMBURSEMENT_RATIO = Decimal('0.15') # change depending on amount raised
 
 # set up necessary accesses...
 access = jsonrpclib.Server("http://doge:wow@127.0.0.1:22555")
@@ -48,7 +48,7 @@ db = MySQLdb.connect(host="localhost",user="root",passwd="",db="testdb") # chang
 cursor = db.cursor()
 
 # get data from db...
-sql = "SELECT * FROM verified_claims"
+sql = "SELECT * FROM verified_claims WHERE flag = 0"
 
 try:
 	# Execute SQL command
@@ -95,8 +95,15 @@ try:
 
 		print "Owed amount: %d" % owed
 		if owed >= 50000:
-			print 'Requested withdrawal was too large (owed > 50000)'
-			print 'A problem may have occured'
+			print 'Requested withdrawal was too large (owed > 50000). Updating flag.'
+			sql_flag = "UPDATE verified_claims SET flag = 1 WHERE id = %s" % row_id
+			try:
+				cursor.execute(sql_flag)
+				db.commit()
+			except:
+				print "Error occured while updating flag. Check row_id %d. Flag should be 1" % row_id
+				db.rollback()
+				break
 			continue
 
 		try:
@@ -112,7 +119,7 @@ try:
 			cursor.execute(sql_update)
 			db.commit()
 		except:
-			print "A problem occured during table update. Check row_id %d. New reimbursed should be %d" % (row_id, amount_reimbursed)
+			print "Error occured while updating amount_reimbursed. Check row_id %d. New reimbursed should be %d" % (row_id, amount_reimbursed)
 			db.rollback()
 			break
 except:
