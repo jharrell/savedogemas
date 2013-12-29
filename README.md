@@ -5,10 +5,14 @@ The Save Dogemas website repo. The files contained here are a mixture of Python,
 
 ## Team
 
-[Jon Harrell](https://github.com/jbharrell92)
-[Diego Perini](https://github.com/diegoperini)
-[Alex Hatzenbuhler](https://github.com/ahatzz11)
-[Gabe Medine](https://github.com/GabeMedine)
+
+[Jon Harrell](https://github.com/jbharrell92) 
+
+[Diego Perini](https://github.com/diegoperini) 
+
+[Alex Hatzenbuhler](https://github.com/ahatzz11) 
+
+[Gabe Medine](https://github.com/GabeMedine) 
 
 
 
