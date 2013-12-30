@@ -40,7 +40,7 @@ a.button {
     padding: 7px 12px;
     position: relative;
     display: inline-block;
-    text-shadow: 0 1px 0 #fff;
+    text-shadow: 0 1px 0 #063;
     -webkit-transition: border-color .218s;
     -moz-transition: border .218s;
     -o-transition: border-color .218s;
@@ -76,11 +76,15 @@ margin: 0 auto;
 
 .container{
 	background: #fff;
-	max-width: 700px;
+	max-width: 725px;
 	margin-left:auto;
 	margin-right:auto;
 	text-align: center ;
 	padding: 15px;
+	border-radius: 45px;
+	-webkit-box-shadow: 1px 2px 10px rgba(0,0,0,.5);
+	-moz-box-shadow: 1px 2px 10px rgba(0,0,0,.5);
+	box-shadow: 1px 2px 10px rgba(0,0,0,.5);
 }
 
 .progressbar{
