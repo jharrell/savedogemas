@@ -14,6 +14,8 @@ The Save Dogemas website repo. The files contained here are a mixture of Python,
 
 [Gabe Medine](https://github.com/GabeMedine) 
 
+[Øystein Sigholt](https://github.com/oysteinsigholt)
+
 
 
 ## Files and Functions
