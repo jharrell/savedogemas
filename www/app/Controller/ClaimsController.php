@@ -55,7 +55,7 @@ class ClaimsController extends AppController {
 			    ->send("Thank you for signing up for the SaveDogemas program. For us to help you out, you need to first verify your email address by visiting the following URL: ".Router::url('/', true)."claims/view/".$this->Claim->id."/".$hash."  Once you have verified your email address, you may access your claim's status at any time by going to the above URL again.\r\n \r\nThanks!\r\nThe SaveDogemas Team");
 				
                 $this->Session->setFlash(__('Your claim has been added. Please check your email for the verification email. Make sure to check your spam folder.'));
-                return $this->redirect(Router::url('/', true));
+                return $this->redirect(Router::url('/Claims/add', true));
 				
             }
             $this->Session->setFlash(__('Unable to add your claim.'));

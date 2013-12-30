@@ -152,7 +152,9 @@ margin: 0 auto;
 <body>
 <a href="http://savedogemas.com/"><img class="logo" src="http://savedogemas.com/logo.png"></a>
 <div class="container">
+<!--nocache-->
    		<?php echo $this->Session->flash(); ?>
+<!--/nocache-->
 
 			<?php echo $this->fetch('content'); ?>
 </div>

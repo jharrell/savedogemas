@@ -11,12 +11,12 @@ $userAgent = 'SaveDogemas' ;
 	$kl = number_format($kl, 0, '.', '');
 
 	$totalreceived = floor(preg_replace('/\D/', '', $kl));
-$progressbarwidth= ( $totalreceived / 30000000 ) * 100;
+$progressbarwidth= ( $totalreceived / 15000000 ) * 100;
 ?>
 
 
 	<h1 class="heading"> It's the year of the Doge. </h1>
-	<p class="description">On Christmas Day, the spirit of Dogemas was damaged when hackers infiltrated Dogewallet and 					Instadoge, <b>stealing over Ɖ30,000,000 </b> from thousands of friendly shibes. The dogecoin community is coming together to reimburse as much of their losses as possible. <b>Thanks to your help, we have already<span class="raised"> raised Ð<?php echo 	number_format(preg_replace('/\D/', '', $totalreceived)); //THIS LINE WHEREVER YOU WANT THE NUMBER ?></span> for the cause.</b></p>
+	<p class="description">On Christmas Day, the spirit of Dogemas was damaged when hackers infiltrated Dogewallet and 					Instadoge, <b>stealing over Ɖ30,000,000 </b> from thousands of friendly shibes. The dogecoin community is coming together to reimburse as much of their losses as possible. <b>Thanks to your help, we have already<span class="raised"> raised Ð<?php echo 	number_format(preg_replace('/\D/', '', $totalreceived)); //THIS LINE WHEREVER YOU WANT THE NUMBER ?></span> for the cause.</b> We are looking to raise at least Ɖ15,000,000.</p>
 	<?php echo $this->Html->link("Submit A Claim", array('controller' => 'Claims','action'=> 'add'), array( 'class' => 'button')) ?>
     <div class="progressbar">
         <div class="progressbar-inner" style="width: <?php echo $progressbarwidth; ?>%"></div>
