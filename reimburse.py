@@ -125,9 +125,10 @@ try:
 			sql_update = "UPDATE verified_claims SET amount_reimbursed = %s WHERE id = %s" % (amount_reimbursed, row_id)
 
 			print "SENDING: %d to %s" % (owed, toAddress)
-			#access.sendtoaddress(toAddress,float(owed)) # converting to float loses precision, but is needed by sendtoaddress
+			#txid = access.sendtoaddress(toAddress,float(owed)) # converting to float loses precision, but is needed by sendtoaddress
 			print "UPDATING DB"
 			cursor.execute(sql_update)
+			db.commit()
 		except:
 			db.rollback()
 			print 'An error occured.'
