@@ -31,7 +31,7 @@ derived cryptocurrency that uses a similar structure to bitcoind. This script wi
 2) Connect to a locally running MySQL database where the reimbursement amounts and addresses
 are held
 3) Iterate through the database and reimburse users up to a ratio defined by
-REIMBURSEMENT_RATIO. If an amount to reimburse is greater than a set amount (in this case 10,000)
+REIMBURSEMENT_RATIO. If an amount to reimburse is greater than a set amount (REIMBURSEMENT_CAP)
 the user should be manually verified and dealt with instead of in this script.
 4) Database will be updated to reflect new amount paid to each claim.
 
@@ -39,26 +39,28 @@ NOTE: this script must be used on a computer with dogecoind running.
 amounts sent will be deducted from the wallet associated with dogecoind
 
 MYSQL NOTE: rows contained in this database were much larger than what was used here. 
-
-TODO: 	further check code for vulnerabilities and inefficiencies.
-		scrub all sensitive info so this can be open sourced :P
+			the most relevant rows are id, estimated_amount_lost, reimburse_addr, and valid.
 
 """
 import sys, os, re, requests, jsonrpclib, MySQLdb
 
 from decimal import *
 
-TRANSACTION_TAX = Decimal('1.0') # is this right?
 REIMBURSEMENT_RATIO = Decimal('1.0') # change depending on amount raised
 REIMBURSEMENT_CAP = 10000
 
 # set up necessary accesses...
+#change "doge" to your rpcuser
+#change "wow" to your rpcpassword
+#change "127.0.0.1" to your rpcconnect
+#change "22555" to your rpcport
 access = jsonrpclib.Server("http://doge:wow@127.0.0.1:22555")
-db = MySQLdb.connect(host="localhost",user="root",passwd="",db="send_doge") # change this lol
+db = MySQLdb.connect(host="localhost",user="root",passwd="",db="test")
 cursor = db.cursor()
 
 # get data from db...
-sql = "SELECT * FROM claims_processed WHERE valid = 1 AND estimated_amount_lost <= %s" % REIMBURSEMENT_CAP
+# estimated_amount_lost > 0 is necessary as some rows were negative numbers. Possible int overflow or intentional.
+sql = "SELECT * FROM claims_processed WHERE valid = 1 AND estimated_amount_lost <= %s AND estimated_amount_lost > 0" % REIMBURSEMENT_CAP
 
 try:
 	# Execute SQL command
@@ -67,19 +69,15 @@ try:
 	results = cursor.fetchall()
 	for row in results:
 		row_id = row[0]
-		amount_claimed = row[4]
+		owed = row[4]
 		toAddress = row[6]
 		
-
 		#amount reimbursed and claimed should be stored as decimals
 		#to maintain precision.
-		if type(amount_claimed) != Decimal:
-			amount_claimed = Decimal(amount_claimed)
+		if type(owed) != Decimal:
+			owed = Decimal(owed)
 
-		#check to see if already reimbursed was removed, as estimated_amount_lost is updated
-		#upon reimbursement
-
-		owed = amount_claimed + TRANSACTION_TAX
+		#check to see if already reimbursed was removed, as estimated_amount_lost is updated upon reimbursement
 
 		try:
 			toValid = access.validateaddress(toAddress)['isvalid']
@@ -92,18 +90,9 @@ try:
 			continue
 
 		print "Owed amount: %d" % owed
-		if owed >= REIMBURSEMENT_CAP:
-			print 'Requested withdrawal was too large (owed > %d). Updating flag.' % REIMBURSEMENT_CAP
-			"""
-			sql_flag = "UPDATE verified_claims SET flag = 1 WHERE id = %s" % row_id
-			try:
-				cursor.execute(sql_flag)
-				db.commit()
-			except:
-				print "Error occured while updating flag. Check row_id %d. Flag should be 1" % row_id
-				db.rollback()
-				break
-			"""
+		if owed > REIMBURSEMENT_CAP:
+			print 'Requested withdrawal was too large (owed > %d).' % REIMBURSEMENT_CAP
+			print 'Check row id %d associated with address %s' % (row_id, toAddress)
 			continue
 
 
