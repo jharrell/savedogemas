@@ -21,7 +21,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-=======reimbursement script version 1.1==========
+=======reimbursement script version 1.7==========
 
 USAGE: python reimburse.py
 
@@ -32,7 +32,8 @@ derived cryptocurrency that uses a similar structure to bitcoind. This script wi
 are held
 3) Iterate through the database and reimburse users up to a ratio defined by
 REIMBURSEMENT_RATIO. If an amount to reimburse is greater than a set amount (REIMBURSEMENT_CAP)
-the user should be manually verified and dealt with instead of in this script.
+the user should be manually verified and dealt with instead of in this script. If the ratio calculation
+is too low as defined by REIMBURSEMENT_MIN, the amount will be increased to the minimum.
 4) Database will be updated to reflect new amount paid to each claim.
 
 NOTE: this script must be used on a computer with dogecoind running.
@@ -48,6 +49,7 @@ from decimal import *
 
 REIMBURSEMENT_RATIO = Decimal('1.0') # change depending on amount raised
 REIMBURSEMENT_CAP = 10000
+REIMBURSEMENT_MIN = 10000
 
 # set up necessary accesses...
 #change "doge" to your rpcuser
@@ -60,6 +62,7 @@ cursor = db.cursor()
 
 # get data from db...
 # estimated_amount_lost > 0 is necessary as some rows were negative numbers. Possible int overflow or intentional.
+# also, rows with 0 will be ignored so no minimum payment will be given to those rows.
 sql = "SELECT * FROM claims_processed WHERE valid = 1 AND estimated_amount_lost <= %s AND estimated_amount_lost > 0" % REIMBURSEMENT_CAP
 
 try:
@@ -69,13 +72,13 @@ try:
 	results = cursor.fetchall()
 	for row in results:
 		row_id = row[0]
-		owed = row[4]
+		amt_claimed = row[4]
 		toAddress = row[6]
 		
 		#amount reimbursed and claimed should be stored as decimals
 		#to maintain precision.
-		if type(owed) != Decimal:
-			owed = Decimal(owed)
+		if type(amt_claimed) != Decimal:
+			amt_claimed = Decimal(amt_claimed)
 
 		#check to see if already reimbursed was removed, as estimated_amount_lost is updated upon reimbursement
 
@@ -89,7 +92,14 @@ try:
 			print 'toAddress %s is not valid. Check row_id %d. Skipping reimbursement.' % (toAddress,row_id)
 			continue
 
+		# find reimbursement ratio
+		owed = amt_claimed * REIMBURSEMENT_RATIO
+		if owed < REIMBURSEMENT_MIN:
+			print 'Amount to be reimbursed was %d, increasing to %d' % (owed, REIMBURSEMENT_MIN)
+			owed = REIMBURSEMENT_MIN
+
 		print "Owed amount: %d" % owed
+
 		if owed > REIMBURSEMENT_CAP:
 			print 'Requested withdrawal was too large (owed > %d).' % REIMBURSEMENT_CAP
 			print 'Check row id %d associated with address %s' % (row_id, toAddress)
@@ -123,6 +133,3 @@ except:
 	print "Error: unable to fetch data from db"
 
 db.close()
-
-
-
