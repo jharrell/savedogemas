@@ -52,11 +52,14 @@ REIMBURSEMENT_CAP = 10000
 REIMBURSEMENT_MIN = 10000
 
 # set up necessary accesses...
-#change "doge" to your rpcuser
-#change "wow" to your rpcpassword
-#change "127.0.0.1" to your rpcconnect
-#change "22555" to your rpcport
-access = jsonrpclib.Server("http://doge:wow@127.0.0.1:22555")
+# change these to match your specifications
+rpcuser = "doge"
+rpcpassword = "wow"
+rpcconnect = "127.0.0.1"
+rpcport = "22555"
+
+accessString = "http://%s:%s@%s:%s" % (rpcuser, rpcpassword, rpcconnect, rpcport)
+access = jsonrpclib.Server(accessString)
 db = MySQLdb.connect(host="localhost",user="root",passwd="",db="test")
 cursor = db.cursor()
 
